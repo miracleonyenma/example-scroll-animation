@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
 
 const SectionComponent: React.FC<{
   title: string;
@@ -15,9 +21,21 @@ const SectionComponent: React.FC<{
     amount: 0.5,
   });
 
+  const { scrollY } = useScroll();
+  const [scrollDirection, setScrollDirection] = useState("down");
+
+  useMotionValueEvent(scrollY, "change", (current) => {
+    const diff = current - (scrollY.getPrevious() || 0);
+    setScrollDirection(diff > 0 ? "down" : "up");
+  });
+
   useEffect(() => {
     console.log("Element is in view: ", isInView);
   }, [isInView]);
+
+  useEffect(() => {
+    console.log("Scroll direction: ", scrollDirection);
+  }, [scrollDirection]);
 
   return (
     <motion.section
@@ -26,40 +44,44 @@ const SectionComponent: React.FC<{
       ref={ref}
       className="flex flex-col relative min-h-screen items-center justify-center gap-4 p-8 sm:p-16 font-[family-name:var(--font-geist-sans)]"
     >
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: "0",
-          width: "100%",
-          height: "100%",
-        }}
-        animate={{
-          y: isInView ? 0 : -100,
-          opacity: isInView ? 1 : 0,
-        }}
-        exit={{ y: -100, opacity: 0 }}
-        transition={{
-          duration: 0.5,
-          ease: "easeOut",
-        }}
-        className="flex gap-12 justify-center items-center"
-      >
-        <header>
-          <h1 className="text-4xl font-bold">{title}</h1>
-          <p className="text-lg">{description}</p>
-        </header>
-        <figure>
-          <Image
-            src={image}
-            alt="Section Image"
-            width={640}
-            height={480}
-            className="rounded-lg shadow-lg object-cover w-72 h-56"
-          />
-        </figure>
-      </motion.div>
+      <AnimatePresence>
+        {isInView && (
+          <motion.div
+            initial={{ y: scrollDirection == "up" ? -500 : 500, opacity: 0 }}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: "0",
+              width: "100%",
+              height: "100%",
+            }}
+            animate={{
+              y: isInView ? 0 : 500,
+              opacity: isInView ? 1 : 0,
+            }}
+            exit={{ y: scrollDirection == "up" ? 500 : -500, opacity: 0 }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+            }}
+            className="flex gap-12 justify-center items-center"
+          >
+            <header>
+              <h1 className="text-4xl font-bold">{title}</h1>
+              <p className="text-lg">{description}</p>
+            </header>
+            <figure>
+              <Image
+                src={image}
+                alt="Section Image"
+                width={640}
+                height={480}
+                className="rounded-lg shadow-lg object-cover w-72 h-56"
+              />
+            </figure>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 };
