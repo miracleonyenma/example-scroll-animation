@@ -27,7 +27,7 @@ const SectionComponent: React.FC<{
       className="flex flex-col relative min-h-screen items-center justify-center gap-4 p-8 sm:p-16 font-[family-name:var(--font-geist-sans)]"
     >
       <motion.div
-        initial={{ y: 100, opacity: 0 }}
+        initial={{ y: -100, opacity: 0 }}
         style={{
           position: "fixed",
           top: 0,
@@ -36,13 +36,13 @@ const SectionComponent: React.FC<{
           height: "100%",
         }}
         animate={{
-          y: isInView ? 0 : 100,
+          y: isInView ? 0 : -100,
           opacity: isInView ? 1 : 0,
         }}
         exit={{ y: -100, opacity: 0 }}
         transition={{
           duration: 0.5,
-          ease: "easeInOut",
+          ease: "easeOut",
         }}
         className="flex gap-12 justify-center items-center"
       >
